@@ -47,7 +47,7 @@ print ('''
 useragents=["AdsBot-Google ( http://www.google.com/adsbot.html)",
 			"Avant Browser/1.2.789rel1 (http://www.avantbrowser.com)",
 			"Baiduspider ( http://www.baidu.com/search/spider.htm)",
-			"BlackBerry7100i/4.1.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/103",
+			"BlackBerry7i/4.1.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/103",
 			"BlackBerry7520/4.0.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 UP.Browser/5.0.3.3 UP.Link/5.1.2.12 (Google WAP Proxy/1.0)",
 			"BlackBerry8300/4.2.2 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/107 UP.Link/6.2.3.15.0",
 			"BlackBerry8320/4.2.2 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/100",
@@ -476,7 +476,6 @@ useragents=["AdsBot-Google ( http://www.google.com/adsbot.html)",
 			]
 
 
-
 def starturl(): 
 	global url
 	global url2
@@ -603,7 +602,7 @@ def numthreads():
 def multiplication():
 	global multiple
 	try:
-		multiple = int(input("Insert a number of multiplication for the attack [(1-5=transvestite)(50=gay)(100 or Demon King = Bhumibol Adulyadej)]: "))
+		multiple = int(input("Insert a number of multiplication for the attack [(1-5=normal)(50=powerful)(100 or Bhumibol's level)]: "))
 	except ValueError:
 		print("You mistyped, try again.\n")
 		multiplication()
