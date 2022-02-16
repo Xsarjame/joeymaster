@@ -9,8 +9,7 @@ import os
 import sys
 
 
-print \
-"""
+print ('''
 
    )         
           (            
@@ -42,9 +41,7 @@ print \
         |-|
    hs  ,'-'.
        '---'
-
-""" 
-
+>----------------------------------------------''')
 
 
 useragents=["AdsBot-Google ( http://www.google.com/adsbot.html)",
