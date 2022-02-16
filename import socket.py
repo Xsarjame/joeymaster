@@ -3507,13 +3507,13 @@ def proxymode():
 
 def choiceproxysocks():
 	global choice3
-	choice3 = input("Chioce '0' proxymode or type '1' socksmode: ")
+	choice3 = input("Type '0' to enable proxymode or type '1' to enable socksmode: ")
 	if choice3 == "0":
 		choicedownproxy()
 	elif choice3 == "1":
 		choicedownsocks()
 	else:
-		print ("You are stupid and you are LGBT+ .")
+		print ("You mistyped, try again.")
 		choiceproxysocks()
 
 def choicedownproxy():
@@ -3559,7 +3559,7 @@ def proxyget(urlproxy):
 
 def proxylist():
 	global proxies
-	out_file = str(input("Enter the proxylist (proxy.txt): "))
+	out_file = str(input("Enter the proxylist filename/path (proxy.txt): "))
 	if out_file == "":
 		out_file = "proxy.txt"
 	proxies = open(out_file).readlines()
@@ -3568,23 +3568,23 @@ def proxylist():
 def numthreads():
 	global threads
 	try:
-		threads = int(input("insert the desired thread (800000): "))
+		threads = int(input("Insert number of threads (800): "))
 	except ValueError:
-		threads = 800000
-		print ("800000 threads selected.\n")
+		threads = 800
+		print ("800 threads selected.\n")
 	multiplication()
 
 def multiplication():
 	global multiple
 	try:
-		multiple = int(input("Choose a level according to your guts [(1-5=transvestite)(50=Gay)(100=MEN/WOMEN)(1000(GOD)]: "))
+		multiple = int(input("Insert a number of multiplication for the attack [(1-5=transvestite)(50=gay)(100 or Demon King = Bhumibol Adulyadej)]: "))
 	except ValueError:
 		print("You mistyped, try again.\n")
 		multiplication()
 	begin()
 
 def begin():
-	choice6 = input("Press 'Enter' start ddos ")
+	choice6 = input("Press 'Enter' to start attack: ")
 	if choice6 == "":
 		loop()
 	elif choice6 == "Enter": 
