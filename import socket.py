@@ -1,4 +1,3 @@
-
 import socket
 import socks
 import threading
@@ -42,6 +41,7 @@ print ('''
    hs  ,'-'.
        '---'
 >----------------------------------------------''')
+
 
 
 useragents=["AdsBot-Google ( http://www.google.com/adsbot.html)",
